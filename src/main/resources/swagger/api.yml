@@ -1,0 +1,229 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: point-of-sale
+  description: point-of-sale tool for a store
+tags: 
+ - name: Tools
+ - name: Checkout
+servers:
+- url: http://{host}:{port}/{basePath}
+  description: The production API server
+  variables:
+    host:
+      default: localhost
+      description: Server point-of-sale 
+    port:
+      enum:
+        - '8081'
+      default: '8081'
+    basePath:
+      default: pointofsale
+paths: 
+  /api/v1/pointofsale:
+   post:
+      tags:
+        - Transcription
+      summary: point-of-sale 
+      description: point of sale for a store
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Inform the user that request is successfull
+          content:
+            application/json:
+              schema:
+                  type: string
+        '400':
+          description: 'invalid input, object invalid'
+        '408':
+          description: Request Timeout
+        '415':
+           description: The request entity has a media type which the server does not support. 
+        '204' : 
+           description: The server successfully processed the request, and is not returning any content. Content will be returned Asynchronously
+        '401':
+            description: Authentication Failed
+        '500':
+            description: Internal Server Error         
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CheckoutRequest'
+        description: Inventory item to add
+  /api/v1/pointofsale-test:
+   post:
+      tags:
+        - Transcription
+      summary: Transcribe the Voice Message
+      description: Transcribe the Voice MessageT
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Inform the user that request is successfull
+          content:
+            application/json:
+              schema:
+                  type: string
+        '400':
+          description: 'invalid input, object invalid'
+        '408':
+          description: Request Timeout
+        '415':
+           description: The request entity has a media type which the server does not support. 
+        '204' : 
+           description: The server successfully processed the request, and is not returning any content. Content will be returned Asynchronously
+        '401':
+            description: Authentication Failed
+        '500':
+            description: Internal Server Error         
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TranscriptionRequest'
+        description: Inventory item to add
+  /api/v1/pointofsale/nuanceVttCallback:             
+   post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+              properties:     
+                messageBody:            
+                  type: string
+      responses:
+        '201':
+          description: Inform the user that request is successfull
+        '400':
+          description: 'invalid input, object invalid'
+        '408':
+          description: Request Timeout
+        '415':
+           description: The request entity has a media type which the server does not support. 
+        '204' : 
+           description: The server successfully processed the request, and is not returning any content. Content will be returned Asynchronously
+        '401':
+            description: Authentication Failed
+        '500':
+            description: Internal Server Error    
+security:
+    - bearerAuth: []        
+components:
+  securitySchemes:
+    bearerAuth:           
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    TranscriptionRequest:
+      type: object
+      required:
+        - requestConfig
+        - audio
+        - messageId
+      properties:
+        subscriberId: 
+          type: string
+          description: subscriberId sent from the client 
+        mdn: 
+          type: string
+          description: mdn sent from the client 
+        transId:
+          type: string
+        clientId:
+          type: string
+          description: For Future Use - This can be used in future for Identifying FCM key for a particular client.
+        clientRefId:
+          type: string
+        callBackUrl:
+          type: string
+        requestConfig:
+          type: object
+          required: 
+            - apiType 
+          properties:
+            preferredProvider:
+              type: string 
+              enum: [voci, nuance] 
+            language:
+              type: string
+              enum: [en, es]
+              example: en
+            apiType:
+              type: object
+              properties:
+                  blocking:
+                    type: boolean 
+                    example: false 
+                  fcmKey:
+                    type: string
+                    example: fcqtpwsfd 
+              required:
+                - apiType
+        audio:
+          type: object
+          properties:
+            content:
+              type: string
+              description: JSON representations use base64
+            contentType:
+              type: string 
+              description: Content should be audio/wave
+              example: audio/amr
+          required:
+            - content
+            - contentType
+    TranscriptionResponse:
+      type: object
+      required: 
+        - transcript
+        - messageId
+      properties:
+        mdn: 
+          type: string
+          description: mdn sent from the client 
+        provider:
+          type: string
+          example: 
+        clientRefId:
+          type: string
+        transId:
+          type: string
+        messageId:
+          type: string
+          example: 
+        transcript:
+          type: string
+          example: "Hello World"
+        guid:
+          type: string
+          example: 21212
+        confidence:
+          type: number
+        fcmKey:
+          type: string
+          example: fcqtpwsfd 
+        cachedTime: 
+          type: string
+          example: 1643052390000 
+        error:
+          type: object
+          required:
+            - code
+          properties:
+            code:
+              type: string
+              enum: [SUCCESS, ERROR]
+              example: SUCCESS
+            message:
+              type: string
+              example: Transcription Error
+    Request:
+      type: Request
+
+             
